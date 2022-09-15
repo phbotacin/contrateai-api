@@ -11,7 +11,7 @@ public class DAO {
 
         Connection conn = null;
         String endDat = "localhost",
-                porDat = "41311",
+                porDat = "3306",
                 datDat = "contrateai",
                 usuDat = "contrateai",
                 senDat = "h#Ki60bBE4HiS#&#MjOOSHYdQnHtvugk",

@@ -37,7 +37,7 @@ public class e010comDAO extends DAO {
             int qtdSaved = 0;
             ArrayList<Map<String, Object>> places = new e030plaDAO().getList();
 
-            try ( Connection c = getConexaoMySql()) {
+            try (Connection c = getConexaoMySql()) {
                 for (Map<String, Object> place : places) {
                     Map<String, Object> body = new HashMap();
                     qtdSaved++;
@@ -54,7 +54,7 @@ public class e010comDAO extends DAO {
                     }
                     body.put("desCom", "");
                     body.put("fonFix", place.get("formatted_phone_number"));
-                    body.put("zapFon", place.get("name"));
+                    body.put("zapFon", place.get("formatted_phone_number"));
 
                     if (place.get("website") != null) {
                         if (place.get("website").toString().contains("facebook")) {
@@ -80,6 +80,7 @@ public class e010comDAO extends DAO {
                     body.put("locLgn", place.get("location_lng"));
                     body.put("codGoo", place.get("place_id"));
                     body.put("codUsu", 0);
+                    body.put("catPrd", "");
                     body.put("sitCom", "A");
                     body.put("usuCad", codUsu);
                     save(c, body).toString();
@@ -94,7 +95,7 @@ public class e010comDAO extends DAO {
 
     public Message saveFromApp(Map<String, Object> body) {
         try {
-            try ( Connection c = getConexaoMySql()) {
+            try (Connection c = getConexaoMySql()) {
                 return save(c, body);
             }
         } catch (SQLException e) {
@@ -110,13 +111,13 @@ public class e010comDAO extends DAO {
             }
 
             String sql = """
-                         INSERT INTO e010com 
-                           (nomCom, paiEnd, ufsEnd, cidEnd, baiEnd, ruaEnd, 
-                              cepEnd, desCom, fonFix, zapFon, facBok, insGrm, 
-                              intNet, fotUrl, codCat, scoOri, urlGoo, webSit, 
-                              locLat, locLgn, codGoo, codUsu, sitCom, usuCad)
-                              VALUES
-                           (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""";
+                    INSERT INTO e010com
+                      (nomCom, paiEnd, ufsEnd, cidEnd, baiEnd, ruaEnd,
+                         cepEnd, desCom, fonFix, zapFon, facBok, insGrm,
+                         intNet, fotUrl, codCat, scoOri, urlGoo, webSit,
+                         locLat, locLgn, codGoo, codUsu, catPrd,  sitCom, usuCad)
+                         VALUES
+                      (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""";
 
             PreparedStatement p = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             p.setObject(1, body.get("nomCom"));
@@ -141,8 +142,9 @@ public class e010comDAO extends DAO {
             p.setObject(20, body.get("locLgn"));
             p.setObject(21, body.get("codGoo"));
             p.setObject(22, body.get("codUsu"));
-            p.setObject(23, body.get("sitCom"));
-            p.setObject(24, body.get("usuCad"));
+            p.setObject(23, body.get("catPrd"));
+            p.setObject(24, body.get("sitCom"));
+            p.setObject(25, body.get("usuCad"));
 
             if (p.executeUpdate() > 0) {
                 ResultSet r = p.getGeneratedKeys();
@@ -167,63 +169,64 @@ public class e010comDAO extends DAO {
         try {
             final String pagination = " LIMIT " + per_page + " OFFSET " + (page * per_page);
             final String order = " ORDER BY com.nomCom ASC \n";
-            String params = " WHERE 1 = 1 \n";
+            String params = " WHERE com.sitcom = 'A' \n";
 
             if (!util.vazio(pNomCom)) {
                 params += " AND UPPER(com.nomcom) LIKE UPPER('%" + pNomCom + "%')";
             }
 
-            try ( Connection c = getConexaoMySql()) {
+            try (Connection c = getConexaoMySql()) {
 
                 if (pCodCat > 1) {
                     if (new e020catDAO().exist(c, pCodCat)) {
                         params += " AND com.codcat = " + pCodCat + "    \n";
                     }
-                }
+                } 
 
                 params += " AND loclat BETWEEN (" + pLocLat + " - 0.10) AND (" + pLocLat + " + 0.10)\n"
                         + "    AND loclgn BETWEEN (" + pLocLgn + " - 0.10) AND (" + pLocLgn + " + 0.10) \n";
 
                 totReg = count(c, params);
                 String sql = """
-                             SELECT
-                                 com.codCom,
-                                 com.nomCom,
-                                 com.paiEnd,
-                                 com.ufsEnd,
-                                 com.cidEnd,
-                                 com.baiEnd,
-                                 com.ruaEnd,
-                                 com.cepEnd,
-                                 com.desCom,
-                                 com.fonFix,
-                                 com.zapFon,
-                                 com.facBok,
-                                 com.insGrm,
-                                 com.intNet,
-                                 com.fotUrl,
-                                 com.codCat,
-                                 cat.nomCat,
-                                 com.scoOri,
-                                 com.urlGoo,
-                                 com.webSit,
-                                 com.locLat,
-                                 com.locLgn,
-                                 com.codGoo,
-                                 com.codUsu,
-                                 com.sitCom,
-                                 com.usuCad
-                               FROM """ + " " +table
+                        SELECT
+                            com.codCom,
+                            com.nomCom,
+                            com.paiEnd,
+                            com.ufsEnd,
+                            com.cidEnd,
+                            com.baiEnd,
+                            com.ruaEnd,
+                            com.cepEnd,
+                            com.desCom,
+                            com.fonFix,
+                            com.zapFon,
+                            com.facBok,
+                            com.insGrm,
+                            com.intNet,
+                            com.fotUrl,
+                            com.codCat,
+                            cat.nomCat,
+                            com.scoOri,
+                            com.urlGoo,
+                            com.webSit,
+                            com.locLat,
+                            com.locLgn,
+                            com.codGoo,
+                            com.codUsu,
+                            com.catPrd,
+                            com.sitCom,
+                            com.usuCad
+                          FROM """ + " " + table
                         + "  LEFT JOIN e020cat cat\n"
                         + "     ON cat.codcat = com.codcat\n"
                         + params
                         + order
                         + pagination;
 
-                        System.out.println(sql);
-
                 PreparedStatement p = c.prepareStatement(sql);
                 ResultSet r = p.executeQuery();
+
+                System.out.println(sql);
 
                 while (r.next()) {
                     Map<String, Object> line = new HashMap<>();
@@ -251,6 +254,7 @@ public class e010comDAO extends DAO {
                     line.put("locLgn", r.getDouble("locLgn"));
                     line.put("codGoo", r.getString("codGoo"));
                     line.put("codUsu", r.getInt("codUsu"));
+                    line.put("catPrd", r.getString("catPrd"));
                     line.put("sitCom", r.getString("sitCom"));
                     line.put("usuCad", r.getInt("usuCad"));
                     list.add(line);

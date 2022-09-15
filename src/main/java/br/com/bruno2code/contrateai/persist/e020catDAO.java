@@ -16,7 +16,7 @@ public class e020catDAO extends DAO {
     Util util = new Util();
     final String table = "e020cat";
 
-    public MessagePaginated list(int page, int per_page, String pSitCat, String pNomCat) {
+    public MessagePaginated list(int page, int per_page, String pNomCat) {
 
         ArrayList list = new ArrayList<>();
         int totReg = 0;
@@ -25,10 +25,6 @@ public class e020catDAO extends DAO {
             final String pagination = " LIMIT " + per_page + " OFFSET " + (page * per_page);
             String params = " WHERE 1 = 1 \n";
             final String order = " ORDER BY codcat \n";
-
-            if (!util.vazio(pSitCat)) {
-                params += " AND sitcat = '" + pSitCat + "' \n";
-            }
 
             if (!util.vazio(pNomCat)) {
                 params += " AND UPPER(nomcat) LIKE UPPER('%" + pNomCat + "%') \n";

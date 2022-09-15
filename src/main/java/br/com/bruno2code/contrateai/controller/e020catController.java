@@ -18,11 +18,10 @@ public class e020catController {
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public String list(
-            @RequestParam(name = "sitCat", required = false) String pSitCat,
             @RequestParam(name = "nomCat", required = false) String pNomCat,
             @RequestParam(name = "page", required = true) int page,
             @RequestParam(name = "per_page", required = true) int per_page) {
 
-        return new Gson().toJson(dao.list(page, per_page, pSitCat, pNomCat));
+        return new Gson().toJson(dao.list(page, per_page, pNomCat));
     }
 }
